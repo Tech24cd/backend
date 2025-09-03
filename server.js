@@ -7,8 +7,25 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const archiver = require("archiver");
 
-const app = express();
+const { Sequelize } = require("sequelize");
 
+// Connexion à la BDD avec SSL (Render / PostgreSQL)
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: "postgres",
+  protocol: "postgres",
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false, // Permet de se connecter sans certificat
+    },
+  },
+});
+
+const db = require("./models"); // tes modèles Sequelize
+db.sequelize = sequelize;
+
+// Initialiser Express
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware CORS
@@ -19,24 +36,19 @@ app.use(
   })
 );
 
-// Middleware pour parser JSON et cookies
+// Middleware JSON + cookies
 app.use(express.json());
 app.use(cookieParser());
 
-// Import du module de la BDD
-const db = require("./models");
-
-// Connexion à la BDD
+// Connexion à la BDD et synchronisation
 db.sequelize
   .authenticate()
   .then(() => {
     console.log("✅ Connecté à la base de données");
-    // Synchronisation
     return db.sequelize.sync({ alter: true });
   })
   .then(() => {
     console.log("🛠️ Base de données synchronisée");
-    // Démarrer le serveur
     app.listen(PORT, () => {
       console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
     });
@@ -50,27 +62,25 @@ app.get("/ping", (req, res) => {
   res.send("pong");
 });
 
-// Routes d'authentification
+// Routes
 const authRoutes = require("./routes/auth.routes");
 app.use("/api/auth", authRoutes);
 
-// Routes utilisateur
 const userRoutes = require("./routes/user.routes");
 app.use("/api/users", userRoutes);
 
-// Routes missions
 const missionRoutes = require("./routes/mission.routes");
 app.use("/api/missions", missionRoutes);
 
 const notificationRoutes = require("./routes/notification.routes");
 app.use("/api/notifications", notificationRoutes);
 
-// --------- Nouvelle route pour télécharger tous les fichiers en ZIP ---------
+// Route pour télécharger tous les fichiers en ZIP
 app.get("/api/missions/:missionId/download-zip", async (req, res) => {
   const { missionId } = req.params;
 
   try {
-    const { PieceJointe } = require("./models"); // Vérifie bien ce chemin et tes modèles
+    const { PieceJointe } = require("./models"); // tes modèles
     const files = await PieceJointe.findAll({ where: { missionId } });
 
     if (!files.length) {
@@ -79,7 +89,6 @@ app.get("/api/missions/:missionId/download-zip", async (req, res) => {
         .json({ message: "Aucun fichier à télécharger pour cette mission." });
     }
 
-    // Préparer les headers
     res.setHeader("Content-Type", "application/zip");
     res.setHeader(
       "Content-Disposition",
@@ -89,9 +98,8 @@ app.get("/api/missions/:missionId/download-zip", async (req, res) => {
     const archive = archiver("zip", { zlib: { level: 9 } });
     archive.pipe(res);
 
-    // Ajouter chaque fichier au ZIP
     files.forEach((file) => {
-      const filePath = path.join(__dirname, "uploads", file.filename); // Adapte si ton chemin diffère
+      const filePath = path.join(__dirname, "uploads", file.filename); 
       archive.file(filePath, { name: file.filename });
     });
 
