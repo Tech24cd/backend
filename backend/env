@@ -1,10 +1,5 @@
-DB_NAME=mission_tracker
-DB_USER=technologie
-DB_PASSWORD=Techcd123@
-DB_HOST=localhost
-PORT=3000
-JWT_SECRET=tonSecretUltraSecret
-
-MAIL_USER=tech.cd2024@gmail.com
-MAIL_PASS= hd to vi j j a n g l o b q r​
-
+DB_HOST=dpg-d2sa0q0gjchc73e19ff0-a.frankfurt-postgres.render.com
+DB_PORT=5432
+DB_NAME=idemdata
+DB_USER=hop
+DB_PASSWORD=qwm1MJTSK1gBNv8dUvBpWxC7c75wqbvD
