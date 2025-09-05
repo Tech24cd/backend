@@ -1,0 +1,8 @@
+DB_HOST=dpg-d2sa0q0gjchc73e19ff0-a.frankfurt-postgres.render.com
+DB_PORT=5432
+DB_NAME=idemdata
+DB_USER=hop
+DB_PASSWORD=qwm1MJTSK1gBNv8dUvBpWxC7c75wqbvD
+FRONTEND_URL=https://frontend-1yig.onrender.com
+PORT=3000
+
