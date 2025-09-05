@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware CORS
 app.use(
   cors({
-    origin: "http://localhost:5173", // Adapter au besoin
+    origin: "https://frontend-1yig.onrender.com", // Adapter au besoin
     credentials: true,
   })
 );
