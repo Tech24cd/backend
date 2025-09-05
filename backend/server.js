@@ -9,12 +9,13 @@ const archiver = require("archiver");
 
 const app = express();
 
+// PORT dynamique pour Render
 const PORT = process.env.PORT || 3000;
 
-// Middleware CORS
+// Middleware CORS avec l'URL du frontend depuis l'env
 app.use(
   cors({
-    origin: "https://frontend-1yig.onrender.com", // Adapter au besoin
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   })
 );
@@ -62,15 +63,16 @@ app.use("/api/users", userRoutes);
 const missionRoutes = require("./routes/mission.routes");
 app.use("/api/missions", missionRoutes);
 
+// Routes notifications
 const notificationRoutes = require("./routes/notification.routes");
 app.use("/api/notifications", notificationRoutes);
 
-// --------- Nouvelle route pour télécharger tous les fichiers en ZIP ---------
+// Route pour télécharger tous les fichiers en ZIP
 app.get("/api/missions/:missionId/download-zip", async (req, res) => {
   const { missionId } = req.params;
 
   try {
-    const { PieceJointe } = require("./models"); // Vérifie bien ce chemin et tes modèles
+    const { PieceJointe } = require("./models"); 
     const files = await PieceJointe.findAll({ where: { missionId } });
 
     if (!files.length) {
@@ -91,7 +93,7 @@ app.get("/api/missions/:missionId/download-zip", async (req, res) => {
 
     // Ajouter chaque fichier au ZIP
     files.forEach((file) => {
-      const filePath = path.join(__dirname, "uploads", file.filename); // Adapte si ton chemin diffère
+      const filePath = path.join(__dirname, "uploads", file.filename);
       archive.file(filePath, { name: file.filename });
     });
 
